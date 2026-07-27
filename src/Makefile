@@ -1,7 +1,7 @@
 CC ?= gcc
 CFLAGS ?= -Wall -Wextra -O2
 
-SRCS = server.c config.c ipc.c
+SRCS = server.c config.c ipc.c connection.c
 OBJS = $(SRCS:.c=.o)
 DEPS = $(SRCS:.c=.d)
 
