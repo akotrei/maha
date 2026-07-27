@@ -16,8 +16,8 @@ int create_ipc_socket(const char* socket_path) {
 
     // 2. Create new socket
     if ((server_fd = socket(AF_UNIX, SOCK_STREAM, 0)) < 0) {
-        perror("[C-IPC] CRITICAL ERROR: Couldn't create new Unix-socket");
-        exit(EXIT_FAILURE);
+        perror("[C-IPC] ERROR: Couldn't create new Unix-socket");
+        return -1;
     }
 
     // 3. Zero all fields and set path
@@ -27,16 +27,16 @@ int create_ipc_socket(const char* socket_path) {
 
     // 4. Link socket server_fd with the file
     if (bind(server_fd, (struct sockaddr *)&address, sizeof(address)) < 0) {
-        perror("[C-IPC] CRITICAL ERROR: Couldn't bind socket to file");
+        perror("[C-IPC] ERROR: Couldn't bind socket to file");
         close(server_fd);
-        exit(EXIT_FAILURE);
+        return -1;
     }
 
     // 5. Enable listening mode
     if (listen(server_fd, 5) < 0) {
-        perror("[C-IPC] CRITICAL ERROR: Couldn't set socket to listen mode");
+        perror("[C-IPC] ERROR: Couldn't set socket to listen mode");
         close(server_fd);
-        exit(EXIT_FAILURE);
+        return -1;
     }
 
     printf("[C-IPC] Unix-socket is created successfully by path: %s\n", socket_path);

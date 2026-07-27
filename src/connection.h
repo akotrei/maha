@@ -15,8 +15,6 @@ typedef struct {
     int slot_id;
 } conn_context_t;
 
-conn_context_t* conn_create(int fd, conn_type_t type);
 int conn_set_nonblocking(int fd);
-void conn_destroy(conn_context_t *ctx);
 
 #endif // CONNECTION_H
