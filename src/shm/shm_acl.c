@@ -78,21 +78,29 @@ uint32_t shm_acl_check_permission(shm_acl_t *acl, uint64_t visitor_id, uint64_t 
         uint32_t curr_idx = (idx + i) & mask;
         shm_acl_entry_t *entry = &acl->table[curr_idx];
 
-        // Fetch primary key with acquire barrier to sync with Python's release stores
-        uint64_t curr_v = atomic_load_explicit(&entry->visitor_id, memory_order_acquire);
+        // 1st Read: Fetch visitor key with acquire barrier
+        uint64_t curr_v1 = atomic_load_explicit(&entry->visitor_id, memory_order_acquire);
 
-        if (curr_v == ACL_EMPTY_KEY) {
-            return 0; // Terminating empty node found, rule definitely does not exist
+        if (curr_v1 == ACL_EMPTY_KEY) {
+            return 0; // Terminating node, rule definitely does not exist
         }
 
-        if (curr_v == visitor_id) {
+        if (curr_v1 == visitor_id) {
+            // Fetch payload data
             uint64_t curr_o = atomic_load_explicit(&entry->owner_id, memory_order_relaxed);
-            if (curr_o == owner_id) {
-                return atomic_load_explicit(&entry->flags, memory_order_relaxed);
+            uint32_t curr_f = atomic_load_explicit(&entry->flags, memory_order_relaxed);
+
+            // 2nd Read (Double-Check): Verify that Python hasn't recycled this slot under our feet
+            uint64_t curr_v2 = atomic_load_explicit(&entry->visitor_id, memory_order_acquire);
+
+            // If the key changed during our read or if it's no longer what we look for,
+            // this loop iteration is invalid -> we must continue checking the chain.
+            if (curr_v1 == curr_v2 && curr_o == owner_id) {
+                return curr_f; // Data is 100% valid and verified
             }
         }
-        // If ACL_TOMBSTONE_KEY (-1) or collision key is found, the loop continues linearly
     }
 
     return 0;
 }
+
