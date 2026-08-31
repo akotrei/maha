@@ -13,7 +13,8 @@ typedef enum {
     CONN_TYPE_CLIENT,           // Active external network user (browser, app)
     CONN_TYPE_AUTH_WORKER,      // Active connection to auth_service.py
     CONN_TYPE_RW_WORKER,        // Active connection to rw_worker.py
-    CONN_TYPE_TRACKER_WORKER    // Active connection to tracker.py
+    CONN_TYPE_TRACKER_WORKER,    // Active connection to tracker.py
+    CONN_TYPE_IPC_HANDSHAKE     // Transit state while reading initial worker handshake packet
 } conn_type_t;
 
 // States exclusively for listener sockets (HTTP & IPC)
@@ -65,12 +66,19 @@ typedef struct {
             uint64_t owner_id;
             uint64_t file_id;
             int32_t  media_type;      // Maps to media_type_t from protocol.h
+
+            int next_sse_idx;         // The first one on a single SSE group in registry_t
+            int prev_sse_idx;         // The last one on a single SSE group in registry_t
         } client;
 
         // Dedicated branch for internal Python service hooks
         struct {
             worker_state_t state;
             int peer_idx;             // Index of the target network client currently being served
+
+            // Asynchronous handshake accumulation buffer (used during CONN_TYPE_IPC_HANDSHAKE)
+            uint8_t handshake_buf[8]; // Raw container for holding the 8-byte initial packet
+            int32_t  handshake_bytes;  // Track exactly how many bytes have been aggregated so far
         } worker;
 
         // Link node utilized only when the current slot sits free inside the pool

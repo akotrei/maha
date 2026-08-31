@@ -1,12 +1,11 @@
+#include "epoll_manager/epoll_manager.h"
+#include "connection/connection.h"
+#include "ipc/ipc.h"
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
-#include "epoll_manager.h"
-#include "connection.h"
-#include "ipc.h"
-
 
 int epoll_manager_init(const server_config_t *config, int *out_ipc_fd, int *out_net_fd) {
     int epoll_fd = -1;

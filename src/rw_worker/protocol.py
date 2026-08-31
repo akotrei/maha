@@ -13,11 +13,20 @@ class MediaType(IntEnum):
 
 
 class IPCCmd(IntEnum):
-    WRITE_CHUNK = 1
-    ACK         = 2
-    FINAL_CHUNK = 3
-    ABORT       = 4
-    DELETE_FILE = 5
+    # --- RW_WORKER DISK COMMANDS ---
+    RW_WRITE_CHUNK = 1
+    RW_ACK         = 2
+    RW_FINAL_CHUNK = 3
+    RW_ABORT       = 4
+    RW_DELETE_FILE = 5
+
+    # --- AUTH_WORKER COMMANDS ---
+    AUTH_REQUEST   = 6
+    AUTH_RESPONSE  = 7
+
+    # --- TRACKER_WORKER COMMANDS ---
+    TRK_REQ_METADATA = 8
+    TRK_META_UPDATED = 9
 
 
 # '=' means Native Endianness (matches C packed struct)
@@ -28,7 +37,7 @@ IPC_MSG_SIZE = struct.calcsize(IPC_MSG_FORMAT)  # Exactly 32 bytes
 
 @dataclass(frozen=True)
 class IPCMessage:
-    cmd: IPCCmd        # Changed from 'type' to avoid overriding Python built-in
+    cmd: IPCCmd        # Matches the updated enum dispatch name
     slot_id: int    
     data_size: int  
     media_type: MediaType
@@ -38,7 +47,7 @@ class IPCMessage:
     @classmethod
     def from_bytes(cls, raw_bytes: bytes) -> IPCMessage:
         """
-        Parse from C struct bytes
+        Parse from C struct packed bytes
         """
         if len(raw_bytes) != IPC_MSG_SIZE:
             raise ValueError(
@@ -60,14 +69,14 @@ class IPCMessage:
 
     def to_bytes(self) -> bytes:
         """
-        Pack back to C struct bytes
+        Pack back to C struct packed bytes
         """
         return struct.pack(
             IPC_MSG_FORMAT, 
-            self.cmd, 
+            self.cmd.value, # Explicitly extract integer value from IntEnum
             self.slot_id, 
             self.data_size, 
-            self.media_type, 
+            self.media_type.value, 
             self.owner_id, 
             self.file_id
         )

@@ -8,6 +8,7 @@
 int parse_arguments(int argc, char **argv, server_config_t *config) {
     config->port = CONFIG_PORT;
     config->max_clients = CONFIG_MAX_CLIENTS;
+    config->max_viewers = CONFIG_MAX_VIEWERS;
     config->max_workers = CONFIG_MAX_WORKERS;
     strncpy(config->socket_path, CONFIG_SOCKET_PATH, sizeof(config->socket_path) - 1);
 
@@ -16,6 +17,7 @@ int parse_arguments(int argc, char **argv, server_config_t *config) {
         switch (opt) {
             case 'p': config->port = atoi(optarg); break;
             case 'c': config->max_clients = atoi(optarg); break;
+            case 'v': config->max_viewers = atoi(optarg); break;
             case 'w': config->max_workers = atoi(optarg); break;
             case 's':
                 memset(config->socket_path, 0, sizeof(config->socket_path));
@@ -34,6 +36,10 @@ int parse_arguments(int argc, char **argv, server_config_t *config) {
     }
     if (config->max_clients <= 0) {
         fprintf(stderr, "Error: Max number of clients should be positive\n");
+        exit(EXIT_FAILURE);
+    }
+    if (config->max_viewers < 0) {
+        fprintf(stderr, "Error: Max number of max_viewers should be not negative\n");
         exit(EXIT_FAILURE);
     }
     if (config->max_workers <= 0) {
