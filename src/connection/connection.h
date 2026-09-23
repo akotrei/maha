@@ -13,7 +13,7 @@ typedef enum {
     CONN_TYPE_CLIENT,           // Active external network user (browser, app)
     CONN_TYPE_AUTH_WORKER,      // Active connection to auth_service.py
     CONN_TYPE_RW_WORKER,        // Active connection to rw_worker.py
-    CONN_TYPE_TRACKER_WORKER,    // Active connection to tracker.py
+    CONN_TYPE_TRACKER_WORKER,   // Active connection to tracker.py
     CONN_TYPE_IPC_HANDSHAKE     // Transit state while reading initial worker handshake packet
 } conn_type_t;
 
