@@ -8,7 +8,10 @@ SRCS = server/server.c \
        config/config.c \
        ipc/ipc.c \
        connection/connection.c \
-       epoll_manager/epoll_manager.c
+       epoll_manager/epoll_manager.c \
+       shm/shm_base.c \
+       shm/shm_chunks.c \
+       shm/shm_acl.c
 
 OBJS = $(SRCS:.c=.o)
 DEPS = $(SRCS:.c=.d)
