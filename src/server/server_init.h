@@ -18,6 +18,9 @@ typedef struct {
     // Shared Memory components initialized prior to the server loop sequence
     shm_chunks_t *chunks_pool;      // Static 64KB memory chunk manager for media streaming
     shm_acl_t    *acl_table;        // Lock-free atomic hardware table for user permissions
+
+    // Network flow amortization triggers
+    int net_listen_saturated;       // Active boolean flag: 1 if accept quota was breached, 0 if queue is clear
 } server_ctx_t;
 
 /**

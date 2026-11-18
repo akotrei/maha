@@ -78,6 +78,9 @@ int server_boot(server_ctx_t *ctx, server_config_t *config) {
         goto fail_listeners;
     }
 
+    // Set unsaturated
+    ctx->net_listen_saturated = 0;
+
     printf("[C-SERVER] Edge-Triggered epoll core is online. Channels bound.\n");
     return 0;
 

@@ -25,9 +25,8 @@ void server_loop(server_ctx_t *ctx) {
     printf("[C-SERVER] Asynchronous kernel is spinning up. Ready for incoming traffic.\n");
 
     while (1) {
-        // Fetch a batch of pending I/O events from the edge-triggered system core.
-        // Timeout is set to -1 (block indefinitely until an event arrives).
-        int nfds = epoll_wait(ctx->epoll_fd, events, MAX_EVENTS, 100);
+        int epoll_timeout = (ctx->net_listen_saturated) ? 0 : -1;
+        int nfds = epoll_wait(ctx->epoll_fd, events, MAX_EVENTS, epoll_timeout);
         
         if (nfds == -1) {
             // If interrupted by an OS signal (e.g., SIGINT / Ctrl+C), safely resume the loop
